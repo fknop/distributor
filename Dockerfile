@@ -56,5 +56,7 @@ USER nobody
 ENV HOME=/app
 ENV DISTRIBUTOR_ENV=production
 
+EXPOSE 4000
+
 CMD trap 'exit' INT; /app/bin/distributor start
 
