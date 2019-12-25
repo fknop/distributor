@@ -4,6 +4,7 @@ on:
   pull_request:
     paths: 
       - './distributor-js/**'
+  push:
 jobs:
   test:
     runs-on: ubuntu-latest
