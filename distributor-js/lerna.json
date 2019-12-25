@@ -2,11 +2,7 @@
   "packages": [
     "packages/*"
   ],
-  "command": {
-    "run": {
-      "npmClient": "yarn"
-    }
-  },
+  "npmClient": "yarn",
   "useWorkspaces": true,
   "publishConfig": {
     "directory": "dist"
