@@ -23,7 +23,7 @@ defmodule Distributor.Application do
         ]
       },
       {Horde.Registry, [name: Distributor.GlobalRegistry, keys: :unique]},
-      {Horde.Supervisor,
+      {Horde.DynamicSupervisor,
        [name: Distributor.GlobalSupervisor, strategy: :one_for_one, shutdown: 10_000]},
       {Distributor.NodeConnector,
        modules: [

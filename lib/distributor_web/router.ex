@@ -9,5 +9,10 @@ defmodule DistributorWeb.Router do
   # Other scopes may use custom stacks.
   scope "/", DistributorWeb do
     pipe_through :api
+
+    scope "/jobs", Job do
+      post "/", Controller, :register_job
+      get "/:id/spec", Controller, :request_spec
+    end
   end
 end

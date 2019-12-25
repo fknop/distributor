@@ -2,6 +2,8 @@ defmodule Distributor.JobServer do
   use GenServer, restart: :transient, shutdown: 10_000
   require Logger
 
+  alias Distributor.Handoff
+
   # Timeout (30 minutes) after which the server will shutdown
   # if no messages were received during that time period
   @timeout 30 * 60 * 1_000
@@ -33,11 +35,11 @@ defmodule Distributor.JobServer do
   end
 
   def terminate(:normal, state) do
-    Distributor.Handoff.unrequest(state.job_id)
+    Handoff.unrequest(state.job_id)
     :ok
   end
 
-  def terminate(reason, state) do
+  def terminate(_reason, state) do
     do_handoff(state)
     :ok
   end
@@ -54,7 +56,7 @@ defmodule Distributor.JobServer do
     |> GenServer.call({:request_spec})
   end
 
-  def handle_call({:register_nodes, node_id}, state) do
+  def handle_call({:register_node, node_id}, _from, state) do
     node_total = state.node_total
     registered_nodes = state.registered_nodes
 
@@ -71,17 +73,17 @@ defmodule Distributor.JobServer do
     end
   end
 
-  def handle_call({:request_spec}, %{spec_files: [spec | specs]} = state) do
+  def handle_call({:request_spec}, _from, %{spec_files: [spec | specs]} = state) do
     {:reply, {:ok, spec}, %{state | spec_files: specs}, @timeout}
   end
 
-  def handle_call({:request_spec}, %{spec_files: []} = state) do
+  def handle_call({:request_spec}, _from, %{spec_files: []} = state) do
     {:reply, {:error, :empty}, state, @timeout}
   end
 
   def handle_continue(:after_init, state) do
     {migrate, handoff_state} =
-      case Sketch.Handoff.request(state.job_id, self(), :requested_handoff) do
+      case Handoff.request(state.job_id, self(), :requested_handoff) do
         {:ok, :requested} ->
           {false, state}
 
@@ -97,8 +99,8 @@ defmodule Distributor.JobServer do
   end
 
   defp do_handoff(state) do
-    Distributor.Handoff.unrequest(state.job_id)
-    Distributor.Handoff.handoff(state.job_id, state)
+    Handoff.unrequest(state.job_id)
+    Handoff.handoff(state.job_id, state)
 
     # Let time for the DeltaCrdt to propagate
     # This will not block anything as Elixir is concurrent

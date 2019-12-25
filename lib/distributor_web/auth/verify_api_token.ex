@@ -11,7 +11,7 @@ defmodule DistributorWeb.VerifyApiToken do
     if System.get_env("DISTRIBUTOR_ENV") != "production" || api_token == authorization_header do
       conn
     else
-      {:ok, body} = Phoenix.json_library().encode(%{reason: type, message: "Unauthorized."})
+      {:ok, body} = Phoenix.json_library().encode(%{message: "Unauthorized."})
 
       conn
       |> put_resp_content_type("application/json")

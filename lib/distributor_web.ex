@@ -47,8 +47,6 @@ defmodule DistributorWeb do
       use Ecto.Schema
       import Plug.Conn
       import Ecto.Changeset
-      import Sketch.EctoHelpers
-      import SketchWeb.ControllerHelpers
 
       use Phoenix.Controller
 
@@ -60,6 +58,7 @@ defmodule DistributorWeb do
         if changeset.valid? do
           validated_params = Map.merge(struct(__MODULE__), changeset.changes)
 
+
           conn |> assign(key, validated_params)
         else
           conn
@@ -68,8 +67,19 @@ defmodule DistributorWeb do
           |> halt
         end
       end
+
+      defp error_map(changeset) do
+        Ecto.Changeset.traverse_errors(changeset, fn {_, value} ->
+          Enum.into(value, %{}) |> filter_values
+        end)
+      end
+      defp filter_values(%{constraint: value}), do: %{constraint: value}
+      defp filter_values(value), do: value
     end
   end
+
+
+
 
   @doc """
   When used, dispatch to the appropriate controller/view/etc.

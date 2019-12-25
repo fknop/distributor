@@ -14,7 +14,7 @@ defmodule Distributor.NodeConnector do
     {:ok, modules}
   end
 
-  def handle_info({:nodeup, _node, _info}, state) do
+  def handle_info({:nodeup, node, _info}, state) do
     Logger.info("NodeConnector: node #{inspect(node)} is up")
     connect(state)
     {:noreply, state}
