@@ -34,7 +34,7 @@ COPY --from=installer /app/deps deps
 
 COPY config config
 COPY priv priv
-COPY lib lib
+COPY distributor/lib lib
 
 RUN mix do compile
 

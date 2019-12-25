@@ -1,0 +1,13 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "lerna": "lerna",
+    "test": "yarn lerna run --parallel test",
+    "clean": "yarn lerna exec -- rm -rf ./node_modules"
+  },
+  "devDependencies": {
+    "lerna": "^3.19.0",
+    "typescript": "^3.7.4"
+  }
+}
