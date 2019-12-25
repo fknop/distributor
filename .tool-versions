@@ -1,0 +1,4 @@
+elixir = 1.9.4
+erlang = 22.1
+nodejs = 12.13.1
+yarn = 1.21.1
