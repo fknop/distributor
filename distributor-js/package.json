@@ -6,6 +6,11 @@
     "test": "yarn lerna run --parallel test",
     "clean": "yarn lerna exec -- rm -rf ./node_modules"
   },
+  "workspaces": {
+    "packages": [
+      "packages/**"
+    ]
+  },
   "devDependencies": {
     "lerna": "^3.19.0",
     "typescript": "^3.7.4"
