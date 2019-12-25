@@ -20,4 +20,5 @@ jobs:
         mix local.hex --force
         mix deps.get
     - name: Run Tests
+      working-directory: ./distributor
       run: mix test
