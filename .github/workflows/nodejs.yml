@@ -1,0 +1,30 @@
+name: Node CI
+
+on: 
+  pull_request:
+    paths: 
+      - './distributor-js/**'
+  push:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: yarn install
+      working-directory: ./distributor-js
+      run: |
+        yarn install --frozen-lockfile
+    - name: yarn test
+      working-directory: ./distributor-js/packages/core
+      run: |
+        yarn test
+      env:
+        CI: true
