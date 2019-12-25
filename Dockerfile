@@ -11,6 +11,7 @@ RUN mix local.hex --force && \
 ENV MIX_ENV=prod
 
 COPY mix.exs ./
+COPY mix.lock ./
 COPY config config
 
 RUN mix do deps.get, deps.compile
@@ -21,8 +22,16 @@ FROM elixir:1.9.4-alpine as builder
 RUN mkdir /app
 WORKDIR /app
 
-COPY --from=builder /app/mix.exs mix.exs
-COPY --from=builder /app/deps deps
+
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+ENV MIX_ENV=prod
+
+COPY --from=installer /app/mix.lock .
+COPY --from=installer /app/mix.exs .
+COPY --from=installer /app/deps deps
+
 COPY config config
 COPY priv priv
 COPY lib lib
