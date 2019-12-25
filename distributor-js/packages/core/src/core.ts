@@ -1,9 +1,12 @@
-import { registerNode, requestSpecFiles } from './api';
+import { registerNode, requestSpecFiles } from './api'
 
 export type OnSuccessFunction = (files: string[]) => Promise<any>
 export type OnErrorFunction = (error: any) => Promise<any>
 
-const fetchFiles = async (onSuccess: OnSuccessFunction, onError: OnErrorFunction) => {
+const fetchFiles = async (
+  onSuccess: OnSuccessFunction,
+  onError: OnErrorFunction
+) => {
   try {
     const pendingSpecFiles = await requestSpecFiles()
     await onSuccess(pendingSpecFiles)
@@ -13,9 +16,10 @@ const fetchFiles = async (onSuccess: OnSuccessFunction, onError: OnErrorFunction
   }
 }
 
-export const run = async (onSuccess: OnSuccessFunction, onError: OnErrorFunction) => {
+export const run = async (
+  onSuccess: OnSuccessFunction,
+  onError: OnErrorFunction
+) => {
   await registerNode()
   await fetchFiles(onSuccess, onError)
 }
-
-
