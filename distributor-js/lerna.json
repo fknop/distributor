@@ -1,0 +1,11 @@
+{
+  "packages": [
+    "packages/*"
+  ],
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "publishConfig": {
+    "directory": "dist"
+  },
+  "version": "0.0.0"
+}
