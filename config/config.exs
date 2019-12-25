@@ -7,7 +7,7 @@
 # General application configuration
 import Config
 
-# config :distributor,
+#config :distributor,
 #  ecto_repos: [Distributor.Repo]
 
 # Configures the endpoint
