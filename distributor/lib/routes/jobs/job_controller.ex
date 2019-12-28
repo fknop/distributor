@@ -18,7 +18,7 @@ defmodule DistributorWeb.Job.Controller do
     Distributor.JobInstantiator.instantiate({id, node_total, spec_files})
     case Distributor.JobServer.register_node(id, node_index) do
       :ok ->
-        conn |> json(%{message: "Success"})
+        conn |> json(%{message: :success})
       {:error, error} ->
         conn |> put_status(400) |> json(%{message: error})
     end
@@ -28,13 +28,13 @@ defmodule DistributorWeb.Job.Controller do
     id = generate_id(id)
 
     case Distributor.JobServer.request_spec(id) do
-      {:ok, spec_file} ->
+      {:ok, spec_files} ->
         conn
-        |> json(%{status: :ok, spec_file: spec_file})
+        |> json(%{status: :ok, spec_files: spec_files})
 
       {:error, :empty} ->
         conn
-        |> json(%{status: :empty, spec_file: nil})
+        |> json(%{status: :empty, spec_files: []})
     end
   end
 
