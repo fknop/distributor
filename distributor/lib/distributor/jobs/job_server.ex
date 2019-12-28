@@ -74,7 +74,7 @@ defmodule Distributor.JobServer do
   end
 
   def handle_call({:request_spec}, _from, %{spec_files: [spec | specs]} = state) do
-    {:reply, {:ok, spec}, %{state | spec_files: specs}, @timeout}
+    {:reply, {:ok, [spec]}, %{state | spec_files: specs}, @timeout}
   end
 
   def handle_call({:request_spec}, _from, %{spec_files: []} = state) do

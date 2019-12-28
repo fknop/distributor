@@ -12,7 +12,7 @@ defmodule DistributorWeb.Router do
 
     scope "/jobs", Job do
       post "/", Controller, :register_job
-      get "/:id/spec", Controller, :request_spec
+      get "/:id/spec_files", Controller, :request_spec
     end
   end
 end
