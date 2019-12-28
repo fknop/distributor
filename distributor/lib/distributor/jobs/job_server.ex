@@ -56,6 +56,12 @@ defmodule Distributor.JobServer do
     |> GenServer.call({:request_spec})
   end
 
+  def get_spec_files(id) do
+    id
+    |> via_tuple
+    |> GenServer.call({:get_spec_files})
+  end
+
   def handle_call({:register_node, node_id}, _from, state) do
     node_total = state.node_total
     registered_nodes = state.registered_nodes
@@ -79,6 +85,10 @@ defmodule Distributor.JobServer do
 
   def handle_call({:request_spec}, _from, %{spec_files: []} = state) do
     {:reply, {:error, :empty}, state, @timeout}
+  end
+
+  def handle_call({:get_spec_files}, _from, %{spec_files: spec_files} = state) do
+    {:reply, spec_files, state, @timeout}
   end
 
   def handle_continue(:after_init, state) do

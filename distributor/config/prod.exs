@@ -16,9 +16,9 @@ config :libcluster,
           ]
         ]
       else
-       [
-        strategy: Elixir.Cluster.Strategy.Gossip
-       ]
+        [
+          strategy: Elixir.Cluster.Strategy.Gossip
+        ]
       end
   ]
 
