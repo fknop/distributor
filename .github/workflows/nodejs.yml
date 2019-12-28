@@ -1,9 +1,6 @@
 name: Node CI
 
 on: 
-  pull_request:
-    paths: 
-      - './distributor-js/**'
   push:
 jobs:
   test:
@@ -14,6 +11,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:

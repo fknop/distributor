@@ -1,10 +1,7 @@
 name: Build Docker Image
 
 on:
-  pull_request:
-    paths:
-      - 'distributor/**'
-
+  push:
 jobs:
   build-image:
     runs-on: ubuntu-latest
