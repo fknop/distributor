@@ -1,8 +1,21 @@
-const getRequiredEnvironment = (
+import { GithubActionsCI } from './ci/github-actions'
+import { JenkinsCI } from './ci/jenkins'
+import { CI } from './ci/ci'
+
+const getEnvironmentVariable = (
   env: string,
-  type: 'string' | 'boolean' | 'number'
+  options: {
+    type?: 'string' | 'boolean' | 'number'
+    fallback?: () => any
+  }
 ): any => {
+  const { fallback, type } = options
+
   if (typeof process.env[env] === 'undefined') {
+    if (fallback && fallback()) {
+      return fallback()
+    }
+
     throw new Error(
       `Environment variable ${env} is required. Read the docs for more information.`
     )
@@ -19,41 +32,60 @@ const getRequiredEnvironment = (
   if (type === 'boolean') {
     return Boolean(process.env[env] as string) as boolean
   }
-
-  throw new Error(
-    `Error loading environment variable ${env}, you might want to check its value.`
-  )
 }
 
-export const DISTRIBUTOR_API_URL: string = getRequiredEnvironment(
+const ciProviders: CI[] = [GithubActionsCI, JenkinsCI]
+
+const ciEnvironment: CI = {
+  getBranch(): string | undefined {
+    return ciProviders.find(ci => ci.getBranch())?.getBranch()
+  },
+
+  getCommitHash(): string | undefined {
+    return ciProviders.find(ci => ci.getCommitHash())?.getCommitHash()
+  },
+
+  getBuildId(): string | undefined {
+    return ciProviders.find(ci => ci.getBuildId())?.getBuildId()
+  },
+}
+
+export const DISTRIBUTOR_API_URL: string = getEnvironmentVariable(
   'DISTRIBUTOR_API_URL',
-  'string'
+  { type: 'string' }
 )
-export const DISTRIBUTOR_API_TOKEN: string = getRequiredEnvironment(
+
+export const DISTRIBUTOR_API_TOKEN: string = getEnvironmentVariable(
   'DISTRIBUTOR_API_TOKEN',
-  'string'
+  { type: 'string' }
 )
-export const DISTRIBUTOR_BUILD_ID = getRequiredEnvironment(
-  'DISTRIBUTOR_BUILD_ID',
-  'string'
-)
-export const DISTRIBUTOR_TEST_SUITE = getRequiredEnvironment(
+
+export const DISTRIBUTOR_TEST_SUITE = getEnvironmentVariable(
   'DISTRIBUTOR_TEST_SUITE',
-  'string'
+  { type: 'string' }
 )
-export const DISTRIBUTOR_NODE_INDEX = getRequiredEnvironment(
+
+export const DISTRIBUTOR_NODE_INDEX = getEnvironmentVariable(
   'DISTRIBUTOR_NODE_INDEX',
-  'number'
+  { type: 'number' }
 )
-export const DISTRIBUTOR_NODE_TOTAL = getRequiredEnvironment(
+
+export const DISTRIBUTOR_NODE_TOTAL = getEnvironmentVariable(
   'DISTRIBUTOR_NODE_TOTAL',
-  'number'
+  { type: 'number' }
 )
-export const DISTRIBUTOR_BRANCH = getRequiredEnvironment(
-  'DISTRIBUTOR_BRANCH',
-  'string'
+
+export const DISTRIBUTOR_BUILD_ID = getEnvironmentVariable(
+  'DISTRIBUTOR_BUILD_ID',
+  { type: 'string', fallback: ciEnvironment.getBuildId }
 )
-export const DISTRIBUTOR_COMMIT_SHA = getRequiredEnvironment(
+
+export const DISTRIBUTOR_BRANCH = getEnvironmentVariable('DISTRIBUTOR_BRANCH', {
+  type: 'string',
+  fallback: ciEnvironment.getBranch,
+})
+
+export const DISTRIBUTOR_COMMIT_SHA = getEnvironmentVariable(
   'DISTRIBUTOR_COMMIT_SHA',
-  'string'
+  { type: 'string', fallback: ciEnvironment.getCommitHash }
 )
