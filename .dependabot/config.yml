@@ -1,0 +1,12 @@
+version: 1
+
+update_configs:
+  - package_manager: "elixir:hex"
+    target_branch: 'develop'
+    directory: "/distributor"
+    update_schedule: "live"
+
+  - package_manager: "javascript"
+    target_branch: 'develop'
+    directory: "/distributor-js"
+    update_schedule: "live"
