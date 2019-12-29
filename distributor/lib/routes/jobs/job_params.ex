@@ -1,4 +1,4 @@
-defmodule DistributorWeb.Job.Params.RegisterJob do
+defmodule DistributorWeb.Job.Params.FetchSpecs do
   use DistributorWeb, :params
 
   @primary_key false

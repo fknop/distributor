@@ -3,7 +3,7 @@ defmodule DistributorWeb.Job.Controller do
 
   alias DistributorWeb.Job.Params, as: Params
 
-  plug Params.RegisterJob, :params when action in [:fetch_queue]
+  plug Params.FetchSpecs, :params when action in [:fetch_queue]
 
   def fetch_queue(conn, _params) do
     %{
@@ -46,7 +46,7 @@ defmodule DistributorWeb.Job.Controller do
     end
   end
 
-  defp generate_id(%{build_id: build_id, api_token: api_token}) do
-    {api_token, build_id}
+  defp generate_id(%{build_id: build_id, branch: branch, commit_sha: commit_sha, test_suite: test_suite, api_token: api_token}) do
+    {api_token, branch, commit_sha, test_suite, build_id}
   end
 end
