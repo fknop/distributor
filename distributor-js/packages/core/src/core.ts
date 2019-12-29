@@ -16,6 +16,11 @@ const fetchSpecs = async ({
 }) => {
   try {
     const pendingSpecFiles = await Api.fetchSpecs({ initialize, specFiles })
+
+    if (pendingSpecFiles.length === 0) {
+      return
+    }
+
     await onSuccess(pendingSpecFiles)
     await fetchSpecs({ specFiles, onSuccess, onError, initialize: false })
   } catch (error) {

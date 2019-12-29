@@ -31,7 +31,7 @@ export const fetchSpecs = async ({
   initialize: boolean
   specFiles: string[]
 }): Promise<string[]> => {
-  return await axios.post('/jobs', {
+  const { data } = await axios.post('/jobs', {
     build_id: DISTRIBUTOR_BUILD_ID,
     node_index: DISTRIBUTOR_NODE_INDEX,
     node_total: DISTRIBUTOR_NODE_TOTAL,
@@ -42,4 +42,6 @@ export const fetchSpecs = async ({
     initialize,
     ...(initialize ? { spec_files: specFiles } : {}),
   })
+
+  return data.spec_files
 }
