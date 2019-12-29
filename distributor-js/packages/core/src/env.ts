@@ -37,6 +37,10 @@ export const DISTRIBUTOR_BUILD_ID = getRequiredEnvironment(
   'DISTRIBUTOR_BUILD_ID',
   'string'
 )
+export const DISTRIBUTOR_TEST_SUITE = getRequiredEnvironment(
+  'DISTRIBUTOR_TEST_SUITE',
+  'string'
+)
 export const DISTRIBUTOR_NODE_INDEX = getRequiredEnvironment(
   'DISTRIBUTOR_NODE_INDEX',
   'number'
@@ -44,4 +48,12 @@ export const DISTRIBUTOR_NODE_INDEX = getRequiredEnvironment(
 export const DISTRIBUTOR_NODE_TOTAL = getRequiredEnvironment(
   'DISTRIBUTOR_NODE_TOTAL',
   'number'
+)
+export const DISTRIBUTOR_BRANCH = getRequiredEnvironment(
+  'DISTRIBUTOR_BRANCH',
+  'string'
+)
+export const DISTRIBUTOR_COMMIT_SHA = getRequiredEnvironment(
+  'DISTRIBUTOR_COMMIT_SHA',
+  'string'
 )

@@ -58,7 +58,6 @@ defmodule DistributorWeb do
         if changeset.valid? do
           validated_params = Map.merge(struct(__MODULE__), changeset.changes)
 
-
           conn |> assign(key, validated_params)
         else
           conn
@@ -73,13 +72,11 @@ defmodule DistributorWeb do
           Enum.into(value, %{}) |> filter_values
         end)
       end
+
       defp filter_values(%{constraint: value}), do: %{constraint: value}
       defp filter_values(value), do: value
     end
   end
-
-
-
 
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
