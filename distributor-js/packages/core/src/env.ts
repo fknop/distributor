@@ -5,7 +5,7 @@ import { CI } from './ci/ci'
 const getEnvironmentVariable = (
   env: string,
   options: {
-    type?: 'string' | 'boolean' | 'number'
+    type?: 'string' | 'number'
     fallback?: () => any
   }
 ): any => {
@@ -26,11 +26,14 @@ const getEnvironmentVariable = (
   }
 
   if (type === 'number') {
-    return parseInt(process.env[env] as string, 10) as number
-  }
+    const result = parseInt(process.env[env] as string, 10) as number
+    if (isNaN(result)) {
+      throw new Error(
+        `Environment variable ${env} must be a number. Read the docs for more information.`
+      )
+    }
 
-  if (type === 'boolean') {
-    return Boolean(process.env[env] as string) as boolean
+    return result
   }
 }
 
