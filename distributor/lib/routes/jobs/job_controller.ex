@@ -3,7 +3,9 @@ defmodule DistributorWeb.Job.Controller do
 
   alias DistributorWeb.Job.Params, as: Params
 
-  plug Params.FetchSpecs, :params when action in [:fetch_queue]
+  plug Params.FetchSpecs, :params when action in [:fetch_queue, :record_queue]
+  plug Params.RecordSpecs, :results when action in [:record_queue]
+
 
   def fetch_queue(conn, _params) do
     %{
@@ -40,6 +42,14 @@ defmodule DistributorWeb.Job.Controller do
       {:error, error} ->
         conn |> put_status(400) |> json(%{status: :error, message: error})
     end
+  end
+
+
+  def record_queue(conn, _params) do
+    id = generate_id(conn.assigns[:params])
+    test_results = conn.assigns[:results]
+
+    conn |> put_status(200)
   end
 
   defp generate_id(%{build_id: build_id, branch: branch, commit_sha: commit_sha, test_suite: test_suite, api_token: api_token}) do

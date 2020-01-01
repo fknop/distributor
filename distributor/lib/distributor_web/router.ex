@@ -12,6 +12,7 @@ defmodule DistributorWeb.Router do
 
     scope "/jobs", Job do
       post "/", Controller, :fetch_queue
+      post "/record", Controller, :record_queue
     end
   end
 end
