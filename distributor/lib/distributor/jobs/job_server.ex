@@ -129,6 +129,9 @@ defmodule Distributor.JobServer do
 
     recorded_test_results =
       test_results
+        |> Enum.filter(
+          &Map.has_key?(state.running_spec_files, &1.name)
+        )
         |> Enum.map(
           &Map.put(&1, :node, node_index)
         )
@@ -203,7 +206,8 @@ defmodule Distributor.JobServer do
       state
     else
       test_results = Map.put(results, name, test_result)
-      %{state | test_results: test_results}
+      running_spec_files = Map.delete(state.running_spec_files, name)
+      %{state | test_results: test_results, running_spec_files: running_spec_files}
     end
   end
 end
