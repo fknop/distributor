@@ -1,12 +1,17 @@
 defmodule Distributor.JobServer do
   use GenServer, restart: :transient, shutdown: 10_000
   require Logger
+  require Distributor.SpecUtils
 
   alias Distributor.Handoff
+  alias Distributor.TestResult
+  alias Distributor.RunningSpec
 
   # Timeout (30 minutes) after which the server will shutdown
   # if no messages were received during that time period
   @timeout 30 * 60 * 1_000
+
+  defguardp is_completed(spec_files, test_results) when map_size(test_results) == length(spec_files)
 
   def start_link(opts) do
     id = Keyword.get(opts, :id)
@@ -21,12 +26,16 @@ defmodule Distributor.JobServer do
 
   def init(opts) do
     id = Keyword.get(opts, :id)
-    spec_files = Keyword.get(opts, :spec_files)
+    spec_files = Keyword.get(opts, :spec_files) |> Enum.sort
     node_total = Keyword.get(opts, :node_total)
+
 
     state = %{
       job_id: id,
-      spec_files: Enum.sort(spec_files),
+      spec_files: spec_files,
+      remaining_spec_files: spec_files,
+      running_spec_files: %{},
+      test_results: %{},
       node_total: node_total,
       registered_nodes: []
     }
@@ -44,16 +53,22 @@ defmodule Distributor.JobServer do
     :ok
   end
 
-  def register_node(id, node_id) do
+  def register_node(id, node_index) do
     id
     |> via_tuple
-    |> GenServer.call({:register_node, node_id})
+    |> GenServer.call({:register_node, node_index})
   end
 
-  def request_spec(id) do
+  def request_spec(id, opts) do
     id
     |> via_tuple
-    |> GenServer.call({:request_spec})
+    |> GenServer.call({:request_spec, opts})
+  end
+
+  def record(id, opts) do
+    id
+    |> via_tuple
+    |> GenServer.call({:record, opts})
   end
 
   def get_spec_files(id) do
@@ -62,29 +77,73 @@ defmodule Distributor.JobServer do
     |> GenServer.call({:get_spec_files})
   end
 
-  def handle_call({:register_node, node_id}, _from, state) do
+  def handle_call({:register_node, node_index}, _from, state) do
     node_total = state.node_total
     registered_nodes = state.registered_nodes
 
     cond do
-      Enum.find(registered_nodes, nil, fn value -> value == node_id end) != nil ->
+      Enum.find(registered_nodes, nil, fn value -> value == node_index end) != nil ->
         {:reply, {:error, :already_registered}, state, @timeout}
 
       Enum.count(registered_nodes) == node_total ->
         {:reply, {:error, :exceed_node_total}, state, @timeout}
 
       true ->
-        nodes = Enum.sort([node_id | registered_nodes])
+        nodes = Enum.sort([node_index | registered_nodes])
         {:reply, :ok, %{state | registered_nodes: nodes}, @timeout}
     end
   end
 
-  def handle_call({:request_spec}, _from, %{spec_files: [spec | specs]} = state) do
-    {:reply, {:ok, [spec]}, %{state | spec_files: specs}, @timeout}
+  def handle_call({:request_spec, _}, _from, %{spec_files: spec_files, test_results: test_results} = state) when is_completed(spec_files, test_results) do
+    {:reply, {:ok, []}, state, @timeout}
   end
 
-  def handle_call({:request_spec}, _from, %{spec_files: []} = state) do
-    {:reply, {:error, :empty}, state, @timeout}
+  def handle_call({:request_spec, opts}, _from, %{remaining_spec_files: [spec | specs]} = state) do
+    %{
+      node_index: node_index
+    } = opts
+
+    running_spec = %RunningSpec{name: spec, node: node_index, start: :os.system_time(:millisecond)}
+
+    new_state =
+      state
+      |> add_running(running_spec)
+      |> Map.put(:remaining_spec_files, specs)
+
+    {:reply, {:ok, [spec]}, new_state , @timeout}
+  end
+
+  def handle_call({:request_spec, _}, _from, %{remaining_spec_files: []} = state) do
+    {:reply, {:ok, []}, state, @timeout}
+  end
+
+  def handle_call({:record, _}, _from, %{spec_files: spec_files, test_results: test_results} = state) when is_completed(spec_files, test_results) do
+    {:reply, :ok, state, @timeout}
+  end
+
+  def handle_call({:record, opts}, _from, state) do
+    %{
+      node_index: node_index,
+      test_results: test_results
+    } = opts
+
+    recorded_test_results =
+      test_results
+        |> Enum.map(
+          &Map.put(&1, :node, node_index)
+        )
+        |> Enum.map(&struct(TestResult, &1))
+
+    new_state =
+      Enum.reduce(
+        recorded_test_results,
+        state,
+        &add_completed(&2, &1)
+      )
+
+    # TODO: if completed, schedule server shutdown sooner than @timeout
+
+    {:reply, :ok, new_state, @timeout}
   end
 
   def handle_call({:get_spec_files}, _from, %{spec_files: spec_files} = state) do
@@ -119,5 +178,32 @@ defmodule Distributor.JobServer do
 
   defp via_tuple(id) do
     {:via, Horde.Registry, {Distributor.GlobalRegistry, {:job, id}}}
+  end
+
+
+  defp add_running(state, %RunningSpec{name: name} = running_spec) do
+    %{
+      running_spec_files: specs
+    } = state
+
+    if Map.has_key?(specs, name) do
+      state
+    else
+      running_spec_files = Map.put(specs, name, running_spec)
+      %{state | running_spec_files: running_spec_files}
+    end
+  end
+
+  defp add_completed(state, %TestResult{name: name} = test_result) do
+    %{
+      test_results: results
+    } = state
+
+    if Map.has_key?(results, name) do
+      state
+    else
+      test_results = Map.put(results, name, test_result)
+      %{state | test_results: test_results}
+    end
   end
 end

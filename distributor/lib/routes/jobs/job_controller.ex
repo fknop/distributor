@@ -31,14 +31,10 @@ defmodule DistributorWeb.Job.Controller do
       end
 
     with :ok <- result do
-      case Distributor.JobServer.request_spec(id) do
+      case Distributor.JobServer.request_spec(id, conn.assigns[:params]) do
         {:ok, spec_files} ->
           conn
-          |> json(%{status: :ok, spec_files: spec_files})
-
-        {:error, :empty} ->
-          conn
-          |> json(%{status: :empty, spec_files: []})
+          |> json(%{spec_files: spec_files})
       end
     else
       {:error, error} ->
