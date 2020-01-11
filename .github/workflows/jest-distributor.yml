@@ -58,7 +58,7 @@ jobs:
     - name: Run tests
       run: |
         (cd distributor && mix phx.server&)
-        (cd distributor-js/packages/jest && ./test.sh)
+        (cd distributor-js/packages/jest && ./test.sh &)
         (cd distributor-js/packages/jest && ./test2.sh)
         
         
