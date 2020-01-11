@@ -1,4 +1,4 @@
-describe('Tests', () => {
+describe('Tests - 2', () => {
   jest.setTimeout(100000)
 
   it('works', async () => {

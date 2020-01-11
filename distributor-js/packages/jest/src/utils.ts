@@ -15,7 +15,5 @@ export const findTestFiles = (): string[] => {
     )
   }
 
-  console.log(files)
-
   return files
 }

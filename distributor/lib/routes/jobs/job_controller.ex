@@ -47,9 +47,19 @@ defmodule DistributorWeb.Job.Controller do
 
   def record_queue(conn, _params) do
     id = generate_id(conn.assigns[:params])
-    test_results = conn.assigns[:results]
 
-    conn |> put_status(200)
+    %{
+      node_index: node_index,
+      node_total: node_total,
+      spec_files: spec_files,
+      initialize: initialize
+    } = conn.assigns[:params]
+
+    %{ test_results: results } = conn.assigns[:results]
+
+#    %{ "name" => name, "success" => success, "time" => time} =
+
+    conn |> send_resp(200, "")
   end
 
   defp generate_id(%{build_id: build_id, branch: branch, commit_sha: commit_sha, test_suite: test_suite, api_token: api_token}) do
