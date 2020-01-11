@@ -1,0 +1,52 @@
+name: Jest Distributor
+
+on:
+  push:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: elixir:1.9.4-slim
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - uses: actions/cache@v1
+      with:
+        path: ./distributor/deps
+        key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/distributor/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-mix-
+          
+    - uses: actions/cache@v1
+      with:
+        path: ${{ steps.yarn-cache.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+          
+    - name: yarn install
+      working-directory: ./distributor-js
+      run: |
+        yarn install --frozen-lockfile
+
+    - name: Install Dependencies
+      working-directory: ./distributor
+      run: |
+        mix local.rebar --force
+        mix local.hex --force
+        mix deps.get
+    
+    - name: Build Javascript
+      working-directory: ./distributor-js
+      run: |
+        yarn lerna run build
+      
+    - name: Run tests
+      run: |
+        (cd distributor && mix phx.server&)
+        (cd distributor-js/packages/jest && ./test.sh)
+        (cd distributor-js/packages/jest && ./test2.sh)
+        
+        
