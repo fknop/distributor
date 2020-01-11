@@ -24,7 +24,7 @@ jobs:
     needs: build-image
     services:
       distributor:
-        image: fknop/distributor:$GITHUB_SHA
+        image: docker.pkg.github.com/fknop/distributor/distributor-api:$GITHUB_SHA
         ports:
           - 4000:4000
 
