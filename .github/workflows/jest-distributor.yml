@@ -32,6 +32,7 @@ jobs:
           ${{ runner.os }}-mix-
           
     - uses: actions/cache@v1
+      continue-on-error: true
       with:
         path: ${{ steps.yarn-cache.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
