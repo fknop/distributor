@@ -1,5 +1,5 @@
 export type TestResult = {
-  path: string
+  name: string
   time: number
   success: boolean
 }

@@ -1,16 +1,18 @@
 import * as Api from './api'
+import { TestResult } from './types'
+import { recordSpecs } from './api'
 
-export type OnSuccessFunction = (files: string[]) => Promise<any>
+export type RunSpecsFunction = (files: string[]) => Promise<TestResult[]>
 export type OnErrorFunction = (error: any) => Promise<any>
 
 const fetchSpecs = async ({
   specFiles,
-  onSuccess,
+  runSpecs,
   onError,
   initialize,
 }: {
   specFiles: string[]
-  onSuccess: OnSuccessFunction
+  runSpecs: RunSpecsFunction
   onError: OnErrorFunction
   initialize: boolean
 }) => {
@@ -21,8 +23,12 @@ const fetchSpecs = async ({
       return
     }
 
-    await onSuccess(pendingSpecFiles)
-    await fetchSpecs({ specFiles, onSuccess, onError, initialize: false })
+    const results = await runSpecs(pendingSpecFiles)
+    if (results?.length > 0) {
+      await recordSpecs({ results })
+    }
+
+    await fetchSpecs({ specFiles, runSpecs, onError, initialize: false })
   } catch (error) {
     await onError(error)
   }
@@ -30,16 +36,16 @@ const fetchSpecs = async ({
 
 export const run = async ({
   specFiles,
-  onSuccess,
+  runSpecs,
   onError,
 }: {
   specFiles: string[]
-  onSuccess: OnSuccessFunction
+  runSpecs: RunSpecsFunction
   onError: OnErrorFunction
 }) => {
   await fetchSpecs({
     specFiles,
-    onSuccess,
+    runSpecs,
     onError,
     initialize: true,
   })

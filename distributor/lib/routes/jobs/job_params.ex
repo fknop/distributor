@@ -75,28 +75,6 @@ defmodule DistributorWeb.Job.Params.FetchSpecs do
 end
 
 
-defmodule DistributorWeb.Job.Params.TestResult do
-  use DistributorWeb, :params
-
-  @primary_key false
-  embedded_schema do
-    field :name, :string
-    field :time, :integer
-    field :success, :boolean
-  end
-
-  def changeset(struct, params \\ %{}) do
-    struct
-    |> cast(params, [
-      :name, :time, :success
-    ])
-    |> validate_required([
-      :name, :time, :success
-    ])
-    |> validate_number(:time, greater_than: 0)
-  end
-end
-
 defmodule DistributorWeb.Job.Params.RecordSpecs do
   use DistributorWeb, :params
 
@@ -104,18 +82,13 @@ defmodule DistributorWeb.Job.Params.RecordSpecs do
 
   @primary_key false
   embedded_schema do
-    embeds_many :test_results, TestResult
+    field :test_results, {:array, :map}
   end
 
 
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [
-      :test_results
-    ])
-    |> validate_required([
-      :test_results
-    ])
+    |> cast(params, [:test_results])
+    |> validate_required([:test_results])
   end
-
 end

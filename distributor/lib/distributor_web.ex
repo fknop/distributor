@@ -57,7 +57,6 @@ defmodule DistributorWeb do
 
         if changeset.valid? do
           validated_params = Map.merge(struct(__MODULE__), changeset.changes)
-
           conn |> assign(key, validated_params)
         else
           conn
