@@ -62,3 +62,11 @@ export const recordSpecs = async ({
     test_results: results,
   })
 }
+
+export const getQueueState = async () => {
+  const { data } = await axios.get('/jobs', {
+    params: environment,
+  })
+
+  return data
+}

@@ -71,10 +71,10 @@ defmodule Distributor.JobServer do
     |> GenServer.call({:record, opts})
   end
 
-  def get_test_results(id) do
+  def get_state(id) do
     id
     |> via_tuple
-    |> GenServer.call({:get_test_results})
+    |> GenServer.call({:get_state})
   end
 
   def get_spec_files(id) do
@@ -159,8 +159,9 @@ defmodule Distributor.JobServer do
     {:reply, spec_files, state, @timeout}
   end
 
-  def handle_call({:get_test_results}, _from, %{test_results: test_results} = state) do
-    {:reply, test_results, state, @timeout}
+  def handle_call({:get_state}, _from, state) do
+    result = Map.take(state, [:test_results, :remaining_spec_fiels, :running_spec_files, :node_total])
+    {:reply, result, state, @timeout}
   end
 
   def handle_continue(:after_init, state) do
