@@ -10,6 +10,7 @@ defmodule Distributor.JobServer do
   # Timeout (30 minutes) after which the server will shutdown
   # if no messages were received during that time period
   @timeout 30 * 60 * 1_000
+  @shutdown_timer 5 * 60 * 1_000
 
   defguardp is_completed(spec_files, test_results) when map_size(test_results) == length(spec_files)
 
@@ -83,6 +84,10 @@ defmodule Distributor.JobServer do
     |> GenServer.call({:get_spec_files})
   end
 
+  def handle_info(:shutdown_queue, _) do
+    {:stop, :normal}
+  end
+
   def handle_call({:register_node, node_index}, _from, state) do
     node_total = state.node_total
     registered_nodes = state.registered_nodes
@@ -150,11 +155,13 @@ defmodule Distributor.JobServer do
         &add_completed(&2, &1)
       )
 
-    # TODO: if completed, schedule server shutdown sooner than @timeout
+    # Everything was recorded, shutdown server after @shutdown_timer
+    # TODO(feat): store results in database for later uses
+    Process.send_after(self(), :shutdown_queue, @shutdown_timer)
 
     {:reply, :ok, new_state, @timeout}
   end
-
+  
   def handle_call({:get_spec_files}, _from, %{spec_files: spec_files} = state) do
     {:reply, spec_files, state, @timeout}
   end
