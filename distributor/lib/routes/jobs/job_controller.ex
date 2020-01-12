@@ -84,7 +84,6 @@ defmodule DistributorWeb.Job.Controller do
           for {key, val} <- test_result, into: %{}, do: {String.to_atom(key), val}
         end)
 
-      IO.inspect(transformed_test_results)
       Distributor.JobServer.record(id, Map.merge(conn.assigns[:environment], %{ test_results: transformed_test_results }))
       conn |> json(%{ message: :ok })
     else
