@@ -11,7 +11,8 @@ defmodule DistributorWeb.Router do
     pipe_through :api
 
     scope "/jobs", Job do
-      post "/", Controller, :fetch_queue
+      post "/", Controller, :fetch_specs
+      get "/", Controller, :fetch_queue
     end
 
     scope "/record", Job do

@@ -3,19 +3,39 @@ defmodule DistributorWeb.Job.Controller do
 
   alias DistributorWeb.Job.Params, as: Params
 
-  plug Params.FetchSpecs, :params when action in [:fetch_queue, :record_queue]
+  plug Params.Environment, :environment when action in [:fetch_specs, :fetch_queue, :record_queue]
+  plug Params.FetchSpecs, :params when action in [:fetch_specs]
   plug Params.RecordSpecs, :results when action in [:record_queue]
 
 
   def fetch_queue(conn, _params) do
+    id = generate_id(conn.assigns[:environment])
+
+    if Distributor.JobServer.exists?(id) do
+      state = Distributor.JobServer.get_state(id)
+      conn |> json(state)
+    else
+      conn |> send_resp(404, "")
+    end
+  end
+
+
+  def fetch_specs(conn, _params) do
     %{
-      node_index: node_index,
-      node_total: node_total,
       spec_files: spec_files,
       initialize: initialize
     } = conn.assigns[:params]
 
-    id = generate_id(conn.assigns[:params])
+    %{
+      node_index: node_index,
+      node_total: node_total
+    } = conn.assigns[:environment]
+
+
+    IO.inspect(conn.assigns[:environment])
+    IO.inspect(conn.assigns[:params])
+
+    id = generate_id(conn.assigns[:environment])
 
     result =
       if initialize do
@@ -32,8 +52,9 @@ defmodule DistributorWeb.Job.Controller do
         :ok
       end
 
+
     with :ok <- result do
-      case Distributor.JobServer.request_spec(id, conn.assigns[:params]) do
+      case Distributor.JobServer.request_spec(id, Map.merge(conn.assigns[:params], conn.assigns[:environment])) do
         {:ok, spec_files} ->
           conn
           |> json(%{spec_files: spec_files})
@@ -46,20 +67,29 @@ defmodule DistributorWeb.Job.Controller do
 
 
   def record_queue(conn, _params) do
-    id = generate_id(conn.assigns[:params])
+    id = generate_id(conn.assigns[:environment])
 
     %{
       node_index: node_index,
       node_total: node_total,
-      spec_files: spec_files,
-      initialize: initialize
-    } = conn.assigns[:params]
+    } = conn.assigns[:environment]
 
-    %{ test_results: results } = conn.assigns[:results]
+    %{
+      test_results: test_results
+    } = conn.assigns[:results]
 
-#    %{ "name" => name, "success" => success, "time" => time} =
+    if Distributor.JobServer.exists?(id) do
+      transformed_test_results = Enum.map(test_results,
+        fn test_result ->
+          for {key, val} <- test_result, into: %{}, do: {String.to_atom(key), val}
+        end)
 
-    conn |> send_resp(200, "")
+      IO.inspect(transformed_test_results)
+      Distributor.JobServer.record(id, Map.merge(conn.assigns[:environment], %{ test_results: transformed_test_results }))
+      conn |> json(%{ message: :ok })
+    else
+      conn |> send_resp(404, "")
+    end
   end
 
   defp generate_id(%{build_id: build_id, branch: branch, commit_sha: commit_sha, test_suite: test_suite, api_token: api_token}) do

@@ -5,7 +5,7 @@ describe('Tests', () => {
     await new Promise(resolve => {
       setTimeout(() => {
         resolve()
-      }, 10000)
+      }, 2000)
     })
     expect(1 + 1).toEqual(2)
   })
