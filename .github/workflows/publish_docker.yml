@@ -2,9 +2,7 @@ name: Build Docker Image
 
 on:
   push:
-    branches:
-      - master
-      - develop
+
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -19,3 +17,52 @@ jobs:
       run: |
         docker login docker.pkg.github.com -u fknop -p ${{ secrets.GITHUB_TOKEN }}
         docker push docker.pkg.github.com/fknop/distributor/distributor-api:$GITHUB_SHA
+
+  jest:
+    needs: build-image
+    services:
+      distributor:
+        image: docker.pkg.github.com/fknop/distributor/distributor-api:${{ github.sha }}
+        ports:
+          - 4000:4000
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Get yarn cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v1
+        continue-on-error: true
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: yarn install
+        working-directory: ./distributor-js
+        run: |
+          yarn install --frozen-lockfile
+
+      - name: Build Javascript
+        working-directory: ./distributor-js
+        run: |
+          yarn lerna run build
+
+      - name: Run tests
+        run: |
+          (cd distributor-js/packages/jest && ./test.sh &)
+          (cd distributor-js/packages/jest && ./test2.sh &)
+
+
