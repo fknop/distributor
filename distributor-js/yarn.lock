@@ -2281,9 +2281,9 @@ aws4@^1.8.0:
   integrity sha512-Uvq6hVe90D0B2WEnUqtdgY1bATGz3mw33nH9Y+dmA+w5DHvUmBgkr5rM/KCHpCsiFNRUfokW/szpPPgMK2hm4A==
 
 axios-retry@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/axios-retry/-/axios-retry-3.1.2.tgz#4f4dcbefb0b434e22b72bd5e28a027d77b8a3458"
-  integrity sha512-+X0mtJ3S0mmia1kTVi1eA3DAC+oWnT2A29g3CpkzcBPMT6vJm+hn/WiV9wPt/KXLHVmg5zev9mWqkPx7bHMovg==
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/axios-retry/-/axios-retry-3.1.7.tgz#600e234f88d38dd86e2e46d620ccace4ab03d3de"
+  integrity sha512-iF8yLLiS96MKaG4qSXhoDEpkZaA4XVs7FErWgIdYpy2RrVl+Hwc3JJ0lsFtPnL7ZAlE02Ocx56j/woxCh6iKHw==
   dependencies:
     is-retry-allowed "^1.1.0"
 
