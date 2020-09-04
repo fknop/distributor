@@ -44,7 +44,7 @@ defmodule Distributor.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:horde, "~> 0.7.1"},
+      {:horde, "~> 0.8.1"},
       {:libcluster, "~> 3.1.1"},
       {:delta_crdt, "~> 0.5.10"},
       {:uuid, "~> 1.1"}
